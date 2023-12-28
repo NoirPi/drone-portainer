@@ -13,22 +13,33 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: "${{ vars.VERSION_TAG }}.${{ github.run_number }}"
-      IMAGE_NAME: "robkaandorp/drone-portainer"
+      IMAGE_NAME: "${{ secrets.REGISTRY_CATALOG }}/drone-portainer"
 
     steps:
     - uses: actions/checkout@v3
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    - name: Login to Docker Hub
+    - name: Login to Registry
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ${{ secrets.REGISTRY_URL }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASS }}
+
+     - name: Get Hash
+      id: hash
+      run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+
+    - name: Check Hash
+      run: echo "${{ env.hash }}"
+
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
+        registry: registry.noircoding.de
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         push: true
         tags: |
-          ${{ env.IMAGE_NAME }}:${{ vars.VERSION_TAG }}
-          ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
-          ${{ env.IMAGE_NAME }}:latest
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{env.hash}}
