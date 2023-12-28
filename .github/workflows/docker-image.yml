@@ -26,20 +26,23 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASS }}
 
-     - name: Get Hash
+    - name: Get Hash
       id: hash
-      run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+      run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
 
     - name: Check Hash
-      run: echo "${{ env.hash }}"
+      run: echo "${{ env.git_hash }}"
 
     - name: Build and push
       uses: docker/build-push-action@v3
+      id: build
       with:
-        registry: registry.noircoding.de
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
         push: true
         tags: |
           ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
-          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{env.hash}}
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.git_hash }}
+
+    - name: Result
+      id: finish
+      run: echo ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.git_hash }}
+      
