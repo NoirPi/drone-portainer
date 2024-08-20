@@ -2,7 +2,7 @@
 
 > Drone portainer plugin to update a portainer stack with a docker compose file.
 
-[![Docker Image CI](https://github.com/robkaandorp/drone-portainer/actions/workflows/docker-image.yml/badge.svg)](https://github.com/robkaandorp/drone-portainer/actions/workflows/docker-image.yml)
+[![Docker Image CI](https://github.com/NoirPi/drone-portainer/actions/workflows/docker-image.yml/badge.svg)](https://github.com/NoirPi/drone-portainer/actions/workflows/docker-image.yml)
 
 ## Version history
 
@@ -21,7 +21,7 @@ type: docker
 name: default
 
 - name: deploy
-  image: robkaandorp/drone-portainer
+  image: noirpi/drone-portainer
   settings:
     portainer_url: http://<ip or hostname>:9000
     portainer_username:

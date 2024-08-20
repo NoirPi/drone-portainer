@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: "${{ vars.VERSION_TAG }}.${{ github.run_number }}"
-      IMAGE_NAME: "robkaandorp/drone-portainer"
+      IMAGE_NAME: "${{ secrets.REGISTRY_CATALOG }}/drone-portainer"
 
     steps:
     - uses: actions/checkout@v4
@@ -24,7 +24,8 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Build and push
+
+    - name: Build and push to Docker Hub
       uses: docker/build-push-action@v5
       with:
         push: true
@@ -32,3 +33,19 @@ jobs:
           ${{ env.IMAGE_NAME }}:${{ vars.VERSION_TAG }}
           ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           ${{ env.IMAGE_NAME }}:latest
+
+    - name: Login to Custom Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.REGISTRY_URL }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASS }}
+
+    - name: Build and push to Custom registry
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: |
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ vars.VERSION_TAG }}
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
